@@ -11,11 +11,6 @@ extends Control
 
 var update_timer: Timer
 
-# Cache previous values to avoid unnecessary updates
-var cached_status: String = ""
-var cached_brightness: float = 0.0
-var cached_fps: float = 0.0
-
 func _ready():
 	setup_ui()
 	setup_timer()
@@ -34,7 +29,7 @@ func setup_ui():
 
 func setup_timer():
 	update_timer = Timer.new()
-	update_timer.wait_time = 0.2  # Update 5 times per second - sufficient for UI updates
+	update_timer.wait_time = 0.1  # Update 10 times per second
 	update_timer.timeout.connect(update_display)
 	add_child(update_timer)
 	update_timer.start()
@@ -55,45 +50,37 @@ func update_display():
 	if not video_stream_receiver:
 		return
 	
-	# Get current values
+	# Update status
 	var status = video_stream_receiver.get_connection_status()
+	status_label.text = "Status: " + status
+	
+	# Update status label color based on connection state
+	match status:
+		"Connected":
+			status_label.modulate = Color.GREEN
+		"Connecting":
+			status_label.modulate = Color.YELLOW
+		"No Address":
+			status_label.modulate = Color.GRAY
+		_:
+			status_label.modulate = Color.RED
+	
+	# Update brightness display
 	var brightness = video_stream_receiver.get_brightness_level()
+	brightness_label.text = "Brightness: %.2f" % brightness
+	
+	# Update brightness bar (convert -1 to 1 range to 0 to 100)
+	var brightness_percent = (brightness + 1.0) * 50.0
+	brightness_bar.value = brightness_percent
+	
+	# Color brightness bar based on level
+	if brightness < -0.3:
+		brightness_bar.modulate = Color.BLUE  # Too dark
+	elif brightness > 0.3:
+		brightness_bar.modulate = Color.RED   # Too bright
+	else:
+		brightness_bar.modulate = Color.GREEN # Good level
+	
+	# Update FPS display
 	var fps = video_stream_receiver.get_current_fps()
-	
-	# Only update status if it changed
-	if status != cached_status:
-		cached_status = status
-		status_label.text = "Status: " + status
-		
-		# Update status label color based on connection state
-		match status:
-			"Connected":
-				status_label.modulate = Color.GREEN
-			"Connecting":
-				status_label.modulate = Color.YELLOW
-			"No Address":
-				status_label.modulate = Color.GRAY
-			_:
-				status_label.modulate = Color.RED
-	
-	# Only update brightness if it changed significantly (0.01 threshold)
-	if abs(brightness - cached_brightness) > 0.01:
-		cached_brightness = brightness
-		brightness_label.text = "Brightness: %.2f" % brightness
-		
-		# Update brightness bar (convert -1 to 1 range to 0 to 100)
-		var brightness_percent = (brightness + 1.0) * 50.0
-		brightness_bar.value = brightness_percent
-		
-		# Color brightness bar based on level
-		if brightness < -0.3:
-			brightness_bar.modulate = Color.BLUE  # Too dark
-		elif brightness > 0.3:
-			brightness_bar.modulate = Color.RED   # Too bright
-		else:
-			brightness_bar.modulate = Color.GREEN # Good level
-	
-	# Only update FPS if it changed significantly (0.1 threshold)
-	if abs(fps - cached_fps) > 0.1:
-		cached_fps = fps
-		fps_label.text = "FPS: %.1f" % fps
+	fps_label.text = "FPS: %.1f" % fps

@@ -101,7 +101,6 @@ text = "Brightness: 0.00"
 
 [node name="BrightnessBar" type="ProgressBar" parent="HSplitContainer/VideoStreamController/VBoxContainer/StatusDisplay"]
 layout_mode = 2
-max_value = 100.0
 
 [node name="FPSLabel" type="Label" parent="HSplitContainer/VideoStreamController/VBoxContainer/StatusDisplay"]
 layout_mode = 2

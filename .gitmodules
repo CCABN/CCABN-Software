@@ -1,3 +1,3 @@
-[submodule "addons/ccabn_videostream"]
-	path = addons/ccabn_videostream
-	url = https://github.com/CCABN/CCABN-VideoStream-GDExtension.git
+[submodule "addons/ccabn_interface"]
+	path = addons/ccabn_interface
+	url = https://github.com/CCABN/CCABN-Interface-GDExtension.git
